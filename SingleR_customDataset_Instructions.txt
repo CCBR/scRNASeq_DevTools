@@ -1,0 +1,39 @@
+library(Seurat)
+library(SingleR)
+library(SingleCellExperiment)
+library(scRNAseq)
+
+#Import all relevant datasets as R data workspaces (load (*.Robj))
+
+#cbind all raw counts matrices (sometimes counts, sometimes raw.data)
+
+#check with cell.names for size
+
+#create new seurat object
+so_ref = CreateSeuratObject(counts=matrix)
+
+#combine all meta.data
+allMeta = rbind(so1@meta.data,so2@meta.data,...)
+
+#save metadata stored in object
+#possible annotations: "orig.ident","location", "sample", "tissue","free_annotation"
+metaDataVec = vector(length=ncol(so_ref))
+metaDataVec = allMeta["colnames(so_ref)","annotation"]
+so_ref$annotation = metaDataVec
+
+#Normalize and scale combined object: SingleR expects log and scaled
+so = NormalizeData(so_ref, method="LogNormalize")
+so = ScaleData(so_ref, feature=rownames(so_ref))
+
+#Save reference dataset
+saveRDS(so,"referenceName.rds")
+
+#Convert reference object to SingleCellExperiment
+sce_ref = as.SingleCellExperiment(so_ref)
+
+#convert experiment object to SingleCellExperiment
+sce_exp=as.SingleCellExperiment(so_exp)
+
+
+#Run SingleR
+singleR_output=SingleR(test=sce_exp,ref=sce_ref,labels=sce_ref[["annotation"]])
